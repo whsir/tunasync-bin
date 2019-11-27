@@ -1,0 +1,52 @@
+#!/bin/sh
+# Provides:          tunasync-manager 
+# Description:       Mirror job management tool.
+
+# Author: whsir <wh@whsir.com>
+
+NAME=tunasync
+TUNASYNC_NAME=tunasync-manager
+TUNASYNC_BIN=/usr/bin/$NAME
+OPTIONS="manager --config /etc/tunasync/manager.conf"
+StatBin=/bin/ps
+
+case "$1" in
+    start)
+        if $StatBin -ef | grep -v grep | grep -q "tunasync manager";then
+            TUNASYNC_PID=`ps -ef | grep -v grep | grep "tunasync manager" | awk -F" " '{print $2}'`
+            echo "$TUNASYNC_NAME (pid $TUNASYNC_PID) already running."
+        else
+            $TUNASYNC_BIN $OPTIONS > /dev/null &
+            echo "Starting $TUNASYNC_NAME... "
+        fi
+    ;;
+
+    status)
+        if $StatBin -ef | grep -v grep | grep -q "tunasync manager";then
+            TUNASYNC_PID=`ps -ef | grep -v grep | grep "tunasync manager" | awk -F" " '{print $2}'`
+            echo "$TUNASYNC_NAME (pid $TUNASYNC_PID) is running."
+        else
+            echo "$TUNASYNC_NAME is not running."
+        fi
+    ;;
+
+    stop)
+        if $StatBin -ef | grep -v grep | grep -q "tunasync manager";then
+            TUNASYNC_PID=`ps -ef | grep -v grep | grep "tunasync manager" | awk -F" " '{print $2}'`
+            kill $TUNASYNC_PID
+            echo "Stop $TUNASYNC_NAME...."
+        else
+            echo "$TUNASYNC_NAME already stopping."
+        fi
+    ;;
+
+    restart)
+        $0 stop
+        $0 start
+    ;; 
+
+    *)
+        echo "Usage: $0 {start|stop|restart|status}"
+        exit 1
+    ;;
+esac
